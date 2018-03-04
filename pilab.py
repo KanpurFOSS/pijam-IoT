@@ -6,7 +6,7 @@
 
 import time
 import RPi.GPIO as GPIO
-from flask import Flask
+from flask import Flask, redirect, render_template, request, url_for
 
 app = Flask(__name__)
 GPIO.setmode(GPIO.BCM) # Broadcom pin-numbering scheme
@@ -20,13 +20,13 @@ GPIO.output(ledPin,GPIO.HIGH)
 GPIO.output(rPin,GPIO.HIGH)
 
 @app.route('/')
-def hello_world():
-
-        GPIO.output(ledPin, GPIO.HIGH)
-        time.sleep(1)
-        GPIO.output(ledPin, GPIO.LOW)
-        time.sleep(1)
-        return 'Hello blink!'
+def index():
+    message = request.args.get("message")
+    GPIO.output(ledPin, GPIO.HIGH)
+    time.sleep(1)
+    GPIO.output(ledPin, GPIO.LOW)
+    time.sleep(1)
+    return render_template("index.html", message = message)
 
 @app.route('/off')
 def on():
@@ -36,7 +36,7 @@ def on():
     time.sleep(5)
 
     #GPIO.cleanup()
-    return 'of.....'
+    return redirect(url_for('index',message = "Lights are now ON"))
 
 @app.route('/on')
 def off():
@@ -47,8 +47,9 @@ def off():
 
 
     #GPIO.cleanup()
-    return 'on....'
+    return redirect(url_for('index',message = "Lights are now ON"))
 
 if __name__ == '__main__':
-    app.run()
+    app.secret_key = "qwertyuiop"
+    app.run(debug = True)
 
